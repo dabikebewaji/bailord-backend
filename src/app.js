@@ -15,6 +15,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const express = require('express');
+const cors = require('cors');
+const app = express();
+
+// This middleware automatically handles the 'OPTIONS' preflight for you
+app.use(cors({
+  origin: 'https://bailord-pulse.vercel.app', // Your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Your routes go below this
+app.post('/auth/login', (req, res) => {
+  // ... login logic
+});
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
