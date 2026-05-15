@@ -1,42 +1,38 @@
-// Create retailers table query
+// Create retailers table query (SQLite compatible)
 export const CREATE_RETAILERS_TABLE = `
   CREATE TABLE IF NOT EXISTS retailers (
-    id VARCHAR(36) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    phone VARCHAR(20) NOT NULL,
-    street_address VARCHAR(255) NOT NULL,
-    city VARCHAR(100) NOT NULL,
-    state VARCHAR(100) NOT NULL,
-    zip_code VARCHAR(20) NOT NULL,
-    country VARCHAR(100) DEFAULT 'Nigeria',
-    business_name VARCHAR(255) NOT NULL,
-    business_type ENUM('Grocery', 'Electronics', 'Fashion', 'Food & Beverage', 'Health & Beauty', 'Other') NOT NULL,
-    registration_number VARCHAR(100) UNIQUE,
-    status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
-    joined_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    bank_name VARCHAR(255),
-    account_number VARCHAR(50),
-    account_name VARCHAR(255),
-    total_sales DECIMAL(15,2) DEFAULT 0,
-    total_orders INT DEFAULT 0,
-    average_rating DECIMAL(3,2) DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_email (email),
-    INDEX idx_city (city),
-    INDEX idx_business_type (business_type),
-    INDEX idx_status (status)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    phone TEXT NOT NULL,
+    street_address TEXT NOT NULL,
+    city TEXT NOT NULL,
+    state TEXT NOT NULL,
+    zip_code TEXT NOT NULL,
+    country TEXT DEFAULT 'Nigeria',
+    business_name TEXT NOT NULL,
+    business_type TEXT NOT NULL CHECK (business_type IN ('Grocery', 'Electronics', 'Fashion', 'Food & Beverage', 'Health & Beauty', 'Other')),
+    registration_number TEXT UNIQUE,
+    status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'suspended')),
+    joined_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
+    bank_name TEXT,
+    account_number TEXT,
+    account_name TEXT,
+    total_sales REAL DEFAULT 0,
+    total_orders INTEGER DEFAULT 0,
+    average_rating REAL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `;
 
-// Insert retailer query
+// Insert retailer query (SQLite compatible)
 export const INSERT_RETAILER = `
   INSERT INTO retailers (
     id, name, email, phone, street_address, city, state, zip_code, country,
     business_name, business_type, registration_number, bank_name, account_number, account_name
-  ) VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 `;
 
 // Get all retailers with pagination

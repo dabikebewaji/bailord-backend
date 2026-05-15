@@ -1,5 +1,6 @@
 import { pool } from '../config/db.js';
 import { catchAsync } from '../utils/catchAsync.js';
+import { randomUUID } from 'crypto';
 import {
   CREATE_RETAILERS_TABLE,
   INSERT_RETAILER,
@@ -32,16 +33,17 @@ export const createRetailer = catchAsync(async (req, res) => {
     bankDetails: { bankName, accountNumber, accountName }
   } = req.body;
 
+  const retailerId = randomUUID();
   const conn = await pool.getConnection();
   
   try {
     const [result] = await conn.query(INSERT_RETAILER, [
-      name, email, phone, street, city, state, zipCode, 
+      retailerId, name, email, phone, street, city, state, zipCode, 
       country || 'Nigeria', businessName, businessType, 
       registrationNumber, bankName, accountNumber, accountName
     ]);
 
-    const [newRetailers] = await conn.query(GET_RETAILER, [result.insertId]);
+    const [newRetailers] = await conn.query(GET_RETAILER, [retailerId]);
     const retailer = newRetailers[0];
 
     // Format the retailer data

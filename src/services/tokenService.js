@@ -17,7 +17,7 @@ export const TokenService = {
   // Check if a token is blacklisted
   isBlacklisted: async (token) => {
     const [rows] = await pool.query(
-      "SELECT * FROM token_blacklist WHERE token = ? AND expires_at > NOW()",
+      "SELECT * FROM token_blacklist WHERE token = ? AND expires_at > CURRENT_TIMESTAMP",
       [token]
     );
     return rows.length > 0;
@@ -34,7 +34,7 @@ export const TokenService = {
   // Update user's refresh token
   updateRefreshToken: async (userId, refreshToken) => {
     await pool.query(
-      "UPDATE users SET refresh_token = ?, last_token_refresh = NOW() WHERE id = ?",
+      "UPDATE users SET refresh_token = ?, last_token_refresh = CURRENT_TIMESTAMP WHERE id = ?",
       [refreshToken, userId]
     );
   },
@@ -60,13 +60,13 @@ export const TokenService = {
       
       await pool.query(
         "INSERT INTO token_blacklist (token, user_id, expires_at) VALUES (?, ?, ?)",
-        [rows[0].refresh_token, userId, expiresAt]
+        [rows[0].refresh_token, userId, expiresAt.toISOString()]
       );
     }
   },
 
   // Clean up expired blacklisted tokens
   cleanupExpiredTokens: async () => {
-    await pool.query("DELETE FROM token_blacklist WHERE expires_at < NOW()");
+    await pool.query("DELETE FROM token_blacklist WHERE expires_at < CURRENT_TIMESTAMP");
   }
 };

@@ -23,19 +23,28 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
-// Test DB connection on startup
-(async () => {
-  try {
-    const conn = await pool.getConnection();
-    console.log("✅ MySQL connected successfully");
-    conn.release();
-  } catch (err) {
-    console.error("❌ Database connection error:", err.message);
-  }
-})();
-
 // Start server
 const PORT = process.env.PORT || 5000;
+
+// Function to find an available port
+const findAvailablePort = (startPort) => {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.listen(startPort, () => {
+      const port = server.address().port;
+      server.close(() => resolve(port));
+    });
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log(`⚠️ Port ${startPort} is in use, trying next port...`);
+        // Ensure we add numbers, not concatenate strings
+        resolve(findAvailablePort(parseInt(startPort) + 1));
+      } else {
+        reject(err);
+      }
+    });
+  });
+};
 
 // Create HTTP server
 import { createServer } from 'http';
@@ -49,10 +58,14 @@ const io = initializeSocket(httpServer);
 // Make io available globally
 app.set('io', io);
 
-// Start server
-httpServer.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🔌 WebSocket server ready at ws://localhost:${PORT}/ws`);
+// Start server with automatic port finding
+findAvailablePort(PORT).then((availablePort) => {
+  httpServer.listen(availablePort, () => {
+    console.log(`🚀 Server running on port ${availablePort}`);
+    console.log(`🔌 WebSocket server ready at ws://localhost:${availablePort}/ws`);
+  });
+}).catch((err) => {
+  console.error('❌ Failed to start server:', err);
 });
 
 export default app;
